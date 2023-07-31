@@ -6,7 +6,7 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAISYngCAuQMmf_SCP3k6gPoftBgsschrQ",
+  apiKey: "",
   authDomain: "chatbotdb-acbf9.firebaseapp.com",
   projectId: "chatbotdb-acbf9",
   storageBucket: "chatbotdb-acbf9.appspot.com",
