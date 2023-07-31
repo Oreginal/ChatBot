@@ -14,7 +14,7 @@ const ChatBot3 = () => {
 
     const [messages, setMessages] = useState([])
     const [conversationHistory, setConversationHistory] = useState([]);
-    const API_Key = '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'
+    const API_Key = ''
     const  user  = authHook();
     
     // useEffect(() => {
