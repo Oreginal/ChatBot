@@ -6,12 +6,12 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAISYngCAuQMmf_SCP3k6gPoftBgsschrQ",
-  authDomain: "chatbotdb-acbf9.firebaseapp.com",
-  projectId: "chatbotdb-acbf9",
-  storageBucket: "chatbotdb-acbf9.appspot.com",
-  messagingSenderId: "377318141741",
-  appId: "1:377318141741:web:a613a31ce732477301eda4"
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.PROJECT_ID,
+  storageBucket: process.env.STORAGE_BUCKET,
+  messagingSenderId: process.env.MESSAGING_SENDER_ID,
+  appId: process.env.APPID
 };
 
 // Initialize Firebase

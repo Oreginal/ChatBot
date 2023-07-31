@@ -11,4 +11,4 @@ const saveConversationToFile = async (conversationData) => {
   }
 };
 
-export default saveConversationToFile
+export { saveConversationToFile };
