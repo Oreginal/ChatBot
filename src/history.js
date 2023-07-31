@@ -2,11 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { FIREBASE_AUTH } from '../config/firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import authHook from '../hook/authHook';
+
 
 
 
 const History = ({ navigation }) => {
   const [conversationHistory, setConversationHistory] = useState([]);
+  const [userId, setUserId] = useState(null);
+
+  const  user  = authHook();
+
+  useEffect(() => {
+    setUserId(user?.uid)
+    console.log('uid', userId)
+  }, [])
+
+  useEffect(() => {
+    if (userId) {
+      loadConversationHistory();
+    }
+  }, [userId]);
 
   useEffect(() => {
     loadConversationHistory();
@@ -14,11 +31,13 @@ const History = ({ navigation }) => {
 
   const loadConversationHistory = async () => {
     try {
-      const fileUri = `${FileSystem.documentDirectory}conversation_history.json`;
+      const filename = `${userId}_conversation_history.json`;
+      const fileUri = `${FileSystem.documentDirectory}${filename}`;
       const fileContents = await FileSystem.readAsStringAsync(fileUri);
       const parsedData = JSON.parse(fileContents);
       setConversationHistory(parsedData);
     } catch (error) {
+      // Handle error or consider this as the first time the user is using the app
       console.error('Error loading conversation history:', error);
     }
   };

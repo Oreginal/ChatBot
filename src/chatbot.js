@@ -5,9 +5,10 @@ import axios from 'axios';
 import wretch from 'wretch'
 import authHook from '../hook/authHook';
 import { useEffect } from 'react';
-import { saveConversationToFile } from '../hook/saveChatbotHistory';
+import { saveConversationHistory } from '../hook/saveChatbotHistory';
 import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 import { Image } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
@@ -25,7 +26,7 @@ const ChatBot3 = () => {
       }, [conversationHistory]);
 
       const saveHistory = () => {
-        saveConversationToFile(conversationHistory);
+        saveConversationHistory(conversationHistory);
       };
 
       const renderBubble = (props) => {
@@ -138,7 +139,9 @@ const ChatBot3 = () => {
               ]);
             console.log('new', conversationHistory)
 
-
+            const filename = `${user?.uid}_conversation_history.json`;
+            const fileUri = `${FileSystem.documentDirectory}${filename}`;
+            await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(conversationHistory));
             
         } catch (error) {
             console.log(error)

@@ -1,14 +1,15 @@
 import * as FileSystem from 'expo-file-system';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const saveConversationToFile = async (conversationData) => {
+
+const saveConversationHistory = async (newHistory) => {
   try {
-    const fileUri = `${FileSystem.documentDirectory}conversation_history.json`;
-    const jsonString = JSON.stringify(conversationData, null, 2);
-    await FileSystem.writeAsStringAsync(fileUri, jsonString);
+    const jsonHistory = JSON.stringify(newHistory);
+    await AsyncStorage.setItem('conversationHistory', jsonHistory);
     console.log('Conversation history saved successfully.');
   } catch (error) {
     console.error('Error saving conversation history:', error);
   }
 };
 
-export { saveConversationToFile };
+export { saveConversationHistory };
