@@ -8,7 +8,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { useEffect } from 'react';
 import { FIREBASE_AUTH } from '../config/firebase';
 
@@ -25,7 +25,19 @@ const Login = () => {
 
         try {
             const response = await signInWithEmailAndPassword(auth, form.email, form.password);
-           // console.log(response);
+            console.log(response);
+          } catch (error) {
+              console.log(error);
+              alert('Failed: '+ error.message)
+          }
+      }
+
+      const signUp = async() => {
+
+        try {
+            const response = await createUserWithEmailAndPassword(auth, form.email, form.password);
+            console.log(response);
+            alert('User successfully created')
           } catch (error) {
               console.log(error);
               alert('Failed: '+ error.message)
@@ -91,11 +103,12 @@ const Login = () => {
           </View>
 
           <TouchableOpacity
-            onPress={() => navigation.navigate()}>
-            <Text style={styles.formFooter}>
-              Don't have an account?{' '}
-              <Text style={{ textDecorationLine: 'underline' }}>Sign up</Text>
-            </Text>
+          //style={styles.category}
+          onPress={()=>signUp()}
+          >
+                <View style={styles.btn}>
+                <Text style={styles.btnText}>Create Account</Text>
+              </View>
           </TouchableOpacity>
         </View>
       </View>

@@ -1,12 +1,14 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import React, {useState} from 'react';
-import { GiftedChat } from 'react-native-gifted-chat';
 import axios from 'axios';
 import wretch from 'wretch'
 import authHook from '../hook/authHook';
 import { useEffect } from 'react';
-import saveConversationToFile from '../hook/chatbotHistory';
+import { saveConversationToFile } from '../hook/saveChatbotHistory';
+import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+import { Image } from 'react-native';
+
 
 
 
@@ -14,12 +16,33 @@ const ChatBot3 = () => {
 
     const [messages, setMessages] = useState([])
     const [conversationHistory, setConversationHistory] = useState([]);
-    const API_Key = ''
+    const API_Key = process.env.OPENAI_API_KEY;
+    const chatBotImage = require('../images/bot.png');
     const  user  = authHook();
     
-    // useEffect(() => {
-    //     console.log(user)
-    // },[])
+    useEffect(() => {
+        saveHistory(); 
+      }, [conversationHistory]);
+
+      const saveHistory = () => {
+        saveConversationToFile(conversationHistory);
+      };
+
+      const renderBubble = (props) => {
+        return (
+          <View>
+            {props.position === 'left' && (
+              <Image
+                source={chatBotImage}
+                style={{ width: 40, height: 40, borderRadius: 20 }}
+              />
+            )}
+            <Bubble {...props} />
+          </View>
+        );
+      };
+      
+    
     const handleSend = async (newMessages = []) => {
         try {
             const userMessage = newMessages[0];
@@ -33,7 +56,7 @@ const ChatBot3 = () => {
             const greatings = 
             ['hello', 'hi', 'good morning', 'good afternoon', 'hey', 'good evening']
             const endings = 
-            ['no thank you', 'bye', 'see you later', 'good night', 'till next time']
+            ['no thank you', 'bye', 'see you later', 'good night', 'till next time', 'thanks', 'thank you', 'thank']
 
             if (greatings.some(greating => messageText.includes(greating))){
                 const botMessage = {
@@ -42,7 +65,7 @@ const ChatBot3 = () => {
                     createdAt: new Date(),
                     user: {
                         _id: 2,
-                        name: 'Moxie Bot'
+                        name: 'Psycad ChatBot'
 
                     }
                 };
@@ -58,7 +81,7 @@ const ChatBot3 = () => {
                     createdAt: new Date(),
                     user: {
                         _id: 2,
-                        name: 'Moxie Bot'
+                        name: 'Psycad ChatBot'
 
                     }
                 };
@@ -73,7 +96,7 @@ const ChatBot3 = () => {
                     createdAt: new Date(),
                     user: {
                         _id: 2,
-                        name: 'Moxie Bot'
+                        name: 'Psycad ChatBot'
 
                     }
                 };
@@ -82,7 +105,7 @@ const ChatBot3 = () => {
             }
 
             const response = await axios.post('https://api.openai.com/v1/engines/text-davinci-003/completions', {
-                prompt: `Get me advice for ${messageText} and explain like you are a psychologist speaking to a patient. Please refer to the patient using their username ${user.email}`,
+                prompt: `Get me advice for ${messageText} and explain like you are a psychologist speaking to a patient. Please refer to the patient using their username ${user.email} and summerize infomation into 50 to 70 words`,
                 //content: "Explain things like you are a psychologist speaking to a patient",
                 max_tokens: 1200,
                 temperature: 0.2,
@@ -103,21 +126,19 @@ const ChatBot3 = () => {
                 createdAt: new Date(),
                 user: {
                     _id: 2,
-                    name: 'Moxie Bot'
+                    name: 'Psycad ChatBot'
                 }
             }
-
+            const botReply = response.data.choices[0].text.trim()
             setMessages(previousMessage => GiftedChat.append(previousMessage, botMessage));
 
             setConversationHistory((prevHistory) => [
                 ...prevHistory,
-                { userMessage: messageText, text },
+                { userMessage: messageText, botReply },
               ]);
             console.log('new', conversationHistory)
-                saveHistory = () => {
-             
-                saveConversationToFile(conversationHistory)
-              };
+
+
             
         } catch (error) {
             console.log(error)
@@ -125,25 +146,14 @@ const ChatBot3 = () => {
     };
 
     return(
-    <View style ={{flex: 1}}>
-        <View
-        style={{backgroundColor: '#F5F5F5',
-        padding: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderBottomWidth: 1,
-        marginTop: 40,
-        marginBottom: 5}}>
-            <Text style={{fontSize:32}}>Psycad ChatBot</Text>
-        </View>
+        <View style={{ flex: 1 }}>
         <GiftedChat
-         messages={messages}
+          messages={messages}
           onSend={newMessages => handleSend(newMessages)}
-          user={{
-          _id: 1,
-         }}
-    />
-    </View>
+          user={{ _id: 1 }}
+          renderBubble={renderBubble} // Use the custom renderBubble function
+        />
+      </View>
     )
 }
 
