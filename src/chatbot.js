@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import { saveConversationToFile } from '../hook/saveChatbotHistory';
 import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 import { Image } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
@@ -16,6 +17,7 @@ const ChatBot3 = () => {
 
     const [messages, setMessages] = useState([])
     const [conversationHistory, setConversationHistory] = useState([]);
+    const [id, setId] = useState('');
     const API_Key = process.env.OPENAI_API_KEY;
     const chatBotImage = require('../images/bot.png');
     const  user  = authHook();
@@ -24,8 +26,15 @@ const ChatBot3 = () => {
         saveHistory(); 
       }, [conversationHistory]);
 
+      useEffect(() => {
+        console.log(user)
+      }, []);
+      
+
+
+
       const saveHistory = () => {
-        saveConversationToFile(conversationHistory);
+        saveConversationToFile(conversationHistory, id);
       };
 
       const renderBubble = (props) => {
@@ -70,6 +79,16 @@ const ChatBot3 = () => {
                     }
                 };
                 setMessages(previousMessage => GiftedChat.append(previousMessage, botMessage));
+                
+                const botReply = "Hello " + user?.email + " I am your Psycad ChatBot how are you feeling today";
+                
+                setConversationHistory((prevHistory) => [
+                  ...prevHistory,
+                  { userMessage: messageText, botReply },
+                ]);
+              console.log('new', conversationHistory)
+              setId(user.uid)
+
                 return;
             }
             
@@ -86,6 +105,15 @@ const ChatBot3 = () => {
                     }
                 };
                 setMessages(previousMessage => GiftedChat.append(previousMessage, botMessage));
+
+                const botReply = "It was a pleasure talking with you. Please feel free to come back anytime I am always available to help. Just say 'Hi'. ";
+                setConversationHistory((prevHistory) => [
+                  ...prevHistory,
+                  { userMessage: messageText, botReply },
+                ]);
+              console.log('new', conversationHistory)
+              setId(user.uid)
+
                 return;
             }
 
@@ -101,6 +129,16 @@ const ChatBot3 = () => {
                     }
                 };
                 setMessages(previousMessage => GiftedChat.append(previousMessage, botMessage));
+
+                const botReply = "Hello I am your Psycad ChatBot, I am your psychology bot. Please ask me about anything concerning your mental health.";
+
+                setConversationHistory((prevHistory) => [
+                  ...prevHistory,
+                  { userMessage: messageText, botReply },
+                ]);
+              console.log('new', conversationHistory)
+              setId(user.uid)
+       
                 return;
             }
 
@@ -137,6 +175,7 @@ const ChatBot3 = () => {
                 { userMessage: messageText, botReply },
               ]);
             console.log('new', conversationHistory)
+            setId(user.uid)
 
 
             

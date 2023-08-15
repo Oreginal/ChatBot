@@ -2,22 +2,45 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { FIREBASE_AUTH } from '../config/firebase';
-
+import authHook from '../hook/authHook';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const History = ({ navigation }) => {
   const [conversationHistory, setConversationHistory] = useState([]);
+  const [id , setId] = useState([]);
+  const  user  = authHook();
 
   useEffect(() => {
     loadConversationHistory();
   }, [conversationHistory]);
 
+  useEffect(() => {
+    if (user)
+    setId(user.uid)
+  }, [user])
+
+  // const loadConversationHistory = async () => {
+  //   try {
+  //     const fileUri = `${FileSystem.documentDirectory}conversation_history.json`;
+  //     const fileContents = await FileSystem.readAsStringAsync(fileUri);
+  //     const parsedData = JSON.parse(fileContents);
+  //     setConversationHistory(parsedData);
+  //   } catch (error) {
+  //     console.error('Error loading conversation history:', error);
+  //   }
+  // };
+
   const loadConversationHistory = async () => {
     try {
-      const fileUri = `${FileSystem.documentDirectory}conversation_history.json`;
-      const fileContents = await FileSystem.readAsStringAsync(fileUri);
-      const parsedData = JSON.parse(fileContents);
-      setConversationHistory(parsedData);
+      const historyKey = `conversationHistory:${id}`;
+      const storedHistory = await AsyncStorage.getItem(historyKey);
+      //console.log(historyKey)
+      if (storedHistory) {
+        const parsedData = JSON.parse(storedHistory);
+        setConversationHistory(parsedData);
+        
+      }
     } catch (error) {
       console.error('Error loading conversation history:', error);
     }
