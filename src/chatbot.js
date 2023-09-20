@@ -18,6 +18,7 @@ const ChatBot3 = () => {
     const [conversationHistory, setConversationHistory] = useState([]);
     const [id, setId] = useState('');
     const [count, setCount] = useState(0);
+    const [chatbotIsTyping, setChatbotIsTyping] = useState(false);
     const API_Key = process.env.OPENAI_API_KEY;
     const chatBotImage = require('../images/bot.png');
     const  user  = authHook();
@@ -55,6 +56,7 @@ const ChatBot3 = () => {
     const handleSend = async (newMessages = []) => {
         try {
             const userMessage = newMessages[0];
+            setChatbotIsTyping(true);
 
             setMessages(previousMessage => GiftedChat.append(previousMessage, userMessage))
             const messageText = userMessage.text.toLowerCase();
@@ -64,6 +66,7 @@ const ChatBot3 = () => {
             ['no thank you', 'bye', 'see you later', 'good night', 'till next time', 'thanks', 'thank you', 'thank']
 
             if (greatings.some(greating => messageText.includes(greating))){
+              setChatbotIsTyping(false);
                 const botMessage = {
                     _id: new Date().getTime() + 1,
                     text: "Hello " + user?.email + " I am your Psycad ChatBot how are you feeling today",
@@ -84,12 +87,13 @@ const ChatBot3 = () => {
                 ]);
               console.log('new', conversationHistory)
               setId(user.uid)
-
+              
                 return;
             }
             
 
             if (endings.some(ending => messageText.includes(ending))){
+              setChatbotIsTyping(false);
                 const botMessage = {
                     _id: new Date().getTime() + 1,
                     text: "It was a pleasure talking with you. Please feel free to come back anytime I am always available to help. Just say 'Hi'. ",
@@ -114,6 +118,7 @@ const ChatBot3 = () => {
             }
 
             if (count == 3) {
+              setChatbotIsTyping(false);
               const botMessage = {
                 _id: new Date().getTime() + 1,
                 text: "Lets take the first step together towards emotional well-being - book an appointment with our skilled psychologist today. If you would like to please type in 'Yes' or 'No' to continue using the ChatBot",
@@ -127,7 +132,7 @@ const ChatBot3 = () => {
 
             setMessages(previousMessage => GiftedChat.append(previousMessage, botMessage));
             setCount(count + 1);
-            console.warn(count);
+            console.log(count);
             const botReply = "Lets take the first step together towards emotional well-being - book an appointment with our skilled psychologist today.";
 
             setConversationHistory((prevHistory) => [
@@ -141,6 +146,7 @@ const ChatBot3 = () => {
             }
 
             if (messageText == 'yes'){
+              setChatbotIsTyping(false);
               //redirect to bookings page
               console.log("redirect")
               Alert.alert(
@@ -156,6 +162,7 @@ const ChatBot3 = () => {
               );
               return;
             } else if(messageText == 'no'){
+              setChatbotIsTyping(false);
               // const botReply = "No problem, lets carry on with our conversation";
 
               const botMessage = {
@@ -171,7 +178,7 @@ const ChatBot3 = () => {
 
             setMessages(previousMessage => GiftedChat.append(previousMessage, botMessage));
             setCount(count + 1);
-            console.warn(count);
+            console.log(count);
             const botReply = "No problem, lets carry on with our conversation";
 
             setConversationHistory((prevHistory) => [
@@ -181,10 +188,9 @@ const ChatBot3 = () => {
    
             return;
             }
+            
 
             const response = await axios.post('https://api.openai.com/v1/engines/text-davinci-003/completions', {
-                // prompt: `Get me advice for ${messageText} and explain like you are a psychologist speaking to a patient. Please refer to the patient using their username ${user.email} and summerize infomation into 50 to 70 words`,
-                //content: "Explain things like you are a psychologist speaking to a patient",
                 prompt: `Check if the user requires emotional support in ${messageText} and if so, please give the user advice on how to deal with their problem. If not please refuse to answer the question`,
                 max_tokens: 1200,
                 temperature: 0.2,
@@ -196,9 +202,10 @@ const ChatBot3 = () => {
                 }
             });
             console.log(response.data);
-
+            setChatbotIsTyping(false);
             setCount(count + 1);
-            console.warn(count);
+            console.log(count);
+
             const text = response.data.choices[0].text.trim();
             const botMessage = {
                 _id: new Date().getTime() + 1,
@@ -223,19 +230,27 @@ const ChatBot3 = () => {
             
         } catch (error) {
             console.log(error)
+            setChatbotIsTyping(false);
         }
     };
 
-    return(
-        <View style={{ flex: 1 }}>
+
+    return (
+      <View style={{ flex: 1 }}>
         <GiftedChat
           messages={messages}
           onSend={newMessages => handleSend(newMessages)}
           user={{ _id: 1 }}
-          renderBubble={renderBubble} 
+          renderBubble={renderBubble}
+          renderFooter={() => {
+            if (chatbotIsTyping) {
+              return <Text>ChatBot is typing...</Text>;
+            }
+            return null;
+          }}
         />
       </View>
-    )
-}
+    );
+};
 
 export default ChatBot3
