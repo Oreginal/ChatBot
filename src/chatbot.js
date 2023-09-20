@@ -2,13 +2,12 @@ import { StatusBar } from 'expo-status-bar';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import React, {useState} from 'react';
 import axios from 'axios';
-import wretch from 'wretch'
 import authHook from '../hook/authHook';
 import { useEffect } from 'react';
 import { saveConversationToFile } from '../hook/saveChatbotHistory';
 import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 import { Image } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 
 
@@ -59,10 +58,6 @@ const ChatBot3 = () => {
 
             setMessages(previousMessage => GiftedChat.append(previousMessage, userMessage))
             const messageText = userMessage.text.toLowerCase();
-            const keywords = 
-            ['sad', 'anxiety', 'depression', 'depressed', 'depressing','angry', 'anger',
-            'bullying', 'bullied', 'exhausted', 'not well', 'not okay', 'feeling down', 'anxious',
-            'mad', 'down'];
             const greatings = 
             ['hello', 'hi', 'good morning', 'good afternoon', 'hey', 'good evening']
             const endings = 
@@ -118,83 +113,7 @@ const ChatBot3 = () => {
                 return;
             }
 
-            if(!keywords.some(keyword => messageText.includes(keyword))){
-
-              if (messageText == 'yes') {
-                //redirect to bookings page
-                console.log("redirect to bookings page")
-                    Alert.alert(
-                     "Book an Appointment",
-                    "Ready to take control of your mental well-being? Click OK to redirect to our bookings page and schedule your appointment.",
-                            [
-                              {
-                                text: "Cancel",
-                                style: "cancel"
-                              },
-                              {
-                                text: "OK",
-                                onPress: () => {
-                                  // Here you can add navigation logic to redirect to the bookings page
-                                  // For example, using React Navigation: navigation.navigate('BookingsPage');
-                                }
-                              }
-                            ],
-                            { cancelable: false }
-                          );
-                    return;
-              } else if (messageText == 'no'){
-
-                const botMessage = {
-                  _id: new Date().getTime() + 1,
-                  text: "Hello " + user?.email + " I am your Psycad ChatBot how are you feeling today",
-                  createdAt: new Date(),
-                  user: {
-                      _id: 2,
-                      name: 'Psycad ChatBot'
-
-                  }
-              };
-              setMessages(previousMessage => GiftedChat.append(previousMessage, botMessage));
-              
-              const botReply = "Hello " + user?.email + " I am your Psycad ChatBot how are you feeling today";
-              
-              setConversationHistory((prevHistory) => [
-                ...prevHistory,
-                { userMessage: messageText, botReply },
-              ]);
-            console.log('new', conversationHistory)
-            setId(user.uid)
-                return;
-              }
-              else
-              {
-                
-                const botMessage = {
-                    _id: new Date().getTime() + 1,
-                    text: "Hello I am your Psycad ChatBot, I am your psychology bot. Please ask me about anything concerning your mental health.",
-                    createdAt: new Date(),
-                    user: {
-                        _id: 2,
-                        name: 'Psycad ChatBot'
-
-                    }
-                };
-                setMessages(previousMessage => GiftedChat.append(previousMessage, botMessage));
-
-                const botReply = "Hello I am your Psycad ChatBot, I am your psychology bot. Please ask me about anything concerning your mental health.";
-
-                setConversationHistory((prevHistory) => [
-                  ...prevHistory,
-                  { userMessage: messageText, botReply },
-                ]);
-              console.log('new', conversationHistory)
-              setId(user.uid)
-       
-                return;
-              }
-            }
-
-            if (count == 4) {
+            if (count == 3) {
               const botMessage = {
                 _id: new Date().getTime() + 1,
                 text: "Lets take the first step together towards emotional well-being - book an appointment with our skilled psychologist today. If you would like to please type in 'Yes' or 'No' to continue using the ChatBot",
@@ -208,7 +127,7 @@ const ChatBot3 = () => {
 
             setMessages(previousMessage => GiftedChat.append(previousMessage, botMessage));
             setCount(count + 1);
-            console.log(count);
+            console.warn(count);
             const botReply = "Lets take the first step together towards emotional well-being - book an appointment with our skilled psychologist today.";
 
             setConversationHistory((prevHistory) => [
@@ -221,9 +140,52 @@ const ChatBot3 = () => {
             return;
             }
 
+            if (messageText == 'yes'){
+              //redirect to bookings page
+              console.log("redirect")
+              Alert.alert(
+                'Redirect',
+                'You are getting redirected to the bookings tab.',
+                [
+                  {
+                    text: 'OK',
+                    onPress: () => console.log('OK Pressed'),
+                  },
+                ],
+                { cancelable: false }
+              );
+              return;
+            } else if(messageText == 'no'){
+              // const botReply = "No problem, lets carry on with our conversation";
+
+              const botMessage = {
+                _id: new Date().getTime() + 1,
+                text: "No problem, lets carry on with our conversation",
+                createdAt: new Date(),
+                user: {
+                    _id: 2,
+                    name: 'Psycad ChatBot'
+
+                }
+            };
+
+            setMessages(previousMessage => GiftedChat.append(previousMessage, botMessage));
+            setCount(count + 1);
+            console.warn(count);
+            const botReply = "No problem, lets carry on with our conversation";
+
+            setConversationHistory((prevHistory) => [
+              ...prevHistory,
+              { userMessage: messageText, botReply },
+            ]);
+   
+            return;
+            }
+
             const response = await axios.post('https://api.openai.com/v1/engines/text-davinci-003/completions', {
-                prompt: `Get me advice for ${messageText} and explain like you are a psychologist speaking to a patient. Please refer to the patient using their username ${user.email} and summerize infomation into 50 to 70 words`,
+                // prompt: `Get me advice for ${messageText} and explain like you are a psychologist speaking to a patient. Please refer to the patient using their username ${user.email} and summerize infomation into 50 to 70 words`,
                 //content: "Explain things like you are a psychologist speaking to a patient",
+                prompt: `Check if the user requires emotional support in ${messageText} and if so, please give the user advice on how to deal with their problem. If not please refuse to answer the question`,
                 max_tokens: 1200,
                 temperature: 0.2,
                 n:1,
@@ -234,9 +196,9 @@ const ChatBot3 = () => {
                 }
             });
             console.log(response.data);
-//const response = await wretch('https://api.openai.com/v1/models/text-davinci-003')
+
             setCount(count + 1);
-            console.log(count);
+            console.warn(count);
             const text = response.data.choices[0].text.trim();
             const botMessage = {
                 _id: new Date().getTime() + 1,
@@ -270,7 +232,7 @@ const ChatBot3 = () => {
           messages={messages}
           onSend={newMessages => handleSend(newMessages)}
           user={{ _id: 1 }}
-          renderBubble={renderBubble} // Use the custom renderBubble function
+          renderBubble={renderBubble} 
         />
       </View>
     )
